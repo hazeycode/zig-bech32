@@ -161,7 +161,7 @@ const Polymod = struct {
         self.val = (self.val & std.math.maxInt(u25)) << 5;
         self.val ^= value;
 
-        inline for (generator) |g, i| {
+        inline for (generator, 0..) |g, i| {
             if (bitset >> @truncate(u5, i) & 1 != 0)
                 self.val ^= g;
         }
@@ -176,7 +176,7 @@ pub fn Bech32Encoder(comptime set: [32]u8, comptime uppercase: bool) type {
     return struct {
         const charset = if (!uppercase) set else blk: {
             var buf: [32]u8 = undefined;
-            for (buf) |*c, i|
+            for (buf, 0..) |*c, i|
                 c.* = std.ascii.toUpper(set[i]);
 
             break :blk buf;
@@ -238,7 +238,7 @@ pub fn Bech32Encoder(comptime set: [32]u8, comptime uppercase: bool) type {
             var polymod = Polymod{};
             var upper = false;
             var lower = false;
-            for (hrp) |c, i| {
+            for (hrp, 0..) |c, i| {
                 assert(c >= 33 and c <= 126);
                 var lc = c;
                 switch (c) {
@@ -289,7 +289,7 @@ pub fn Bech32Decoder(comptime set: [32]u8) type {
     return struct {
         const reverse_charset = blk: {
             var buf = [_]?u5{null} ** 256;
-            for (set) |c, i| {
+            for (set, 0..) |c, i| {
                 buf[c] = i;
                 buf[std.ascii.toUpper(c)] = i;
             }
@@ -350,7 +350,7 @@ pub fn Bech32Decoder(comptime set: [32]u8) type {
             var polymod = Polymod{};
             var upper = false;
             var lower = false;
-            for (hrp) |c, i| {
+            for (hrp, 0..) |c, i| {
                 var lc = c;
                 switch (c) {
                     0...32, 127...255 => return Error.BadChar,
@@ -370,7 +370,7 @@ pub fn Bech32Decoder(comptime set: [32]u8) type {
             for (pmod_buf[0..hrp.len]) |c| polymod.step(c & 31);
 
             var convert_buf: [max_data_len]u5 = undefined;
-            for (data) |c, i| {
+            for (data, 0..) |c, i| {
                 if (std.ascii.isUpper(c)) upper = true;
                 if (std.ascii.isLower(c)) lower = true;
 
